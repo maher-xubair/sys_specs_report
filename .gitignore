@@ -1,5 +1,5 @@
 compile.ps1
 test.ps1
 sys_specs_report_test.exe
-sys_specs_report.exe
 icon.ico
+system-specs-report*

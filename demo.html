@@ -1,0 +1,657 @@
+﻿<!DOCTYPE html>
+<html>
+  <head>
+    <title>System Specification Report</title>
+    <link rel="shortcut icon" href="https://img.icons8.com/fluency/48/imac-settings.png" type="image/x-icon" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        padding: 15px;
+        color: #333;
+        background-color: #f9f9f9;
+        font-size: 0.9em; /* Slightly smaller base font */
+      }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: white;
+        padding: 15px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        border-radius: 5px;
+      }
+      h1 {
+        color: #2c3e50;
+        text-align: center;
+        margin-bottom: 5px;
+        font-size: 1.6em; /* Slightly smaller heading */
+      }
+      .subtitle {
+        text-align: center;
+        color: #7f8c8d;
+        margin-bottom: 20px;
+        font-size: 0.9em;
+      }
+      h2 {
+        color: #3498db;
+        margin-top: 25px;
+        border-bottom: 2px solid #3498db;
+        padding-bottom: 5px;
+        font-size: 1.2em; /* Slightly smaller heading */
+      }
+      h3 {
+        color: #16a085;
+        margin-top: 15px;
+        font-size: 1em; /* Slightly smaller heading */
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin-bottom: 15px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        font-size: 0.85em; /* Slightly smaller table font */
+      }
+      th {
+        background-color: #3498db;
+        color: white;
+        text-align: left;
+        padding: 10px;
+        font-weight: normal;
+      }
+      td {
+        padding: 8px;
+        border-bottom: 1px solid #ecf0f1;
+        vertical-align: top;
+        word-break: break-word;
+      }
+      tr:nth-child(even) {
+        background-color: #f8f9fa;
+      }
+      tr:hover {
+        background-color: #f1f8fe;
+      }
+      .section {
+        margin-bottom: 30px;
+      }
+      .spec-value {
+        font-weight: bold;
+        color: #2c3e50;
+      }
+      .warning {
+        color: #e74c3c;
+        font-weight: bold;
+      }
+      .good {
+        color: #27ae60;
+        font-weight: bold;
+      }
+      .info {
+        color: #3498db;
+        font-weight: bold;
+      }
+      .property-name {
+        width: 30%;
+      }
+      .system-overview {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        margin-bottom: 15px;
+        background: #ecf0f1;
+        padding: 10px;
+        border-radius: 5px;
+      }
+      .overview-item {
+        flex: 1;
+        min-width: 200px;
+        margin: 5px;
+      }
+      .footer {
+        text-align: center;
+        margin-top: 20px;
+        color: #7f8c8d;
+        font-size: 0.8em;
+      }
+      @media (max-width: 600px) {
+        body {
+          padding: 5px;
+          font-size: 0.8em; /* Further reduce font size for mobile */
+        }
+        .container {
+          padding: 10px;
+        }
+        h1 {
+          font-size: 1.4em;
+        }
+        h2 {
+          font-size: 1.1em;
+        }
+        h3 {
+          font-size: 0.9em;
+        }
+        table {
+          font-size: 0.75em; /* Further reduce table font size for mobile */
+        }
+        th,
+        td {
+          padding: 6px;
+        }
+        .overview-item {
+          min-width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>System Specification Report</h1>
+      <div class="subtitle">Generated on 2025-05-27 10:25:06 PM</div>
+      <div class="system-overview">
+        <div class="overview-item">
+          <h3>System Overview</h3>
+          <p><span class="spec-value">GenericPC Model X100</span></p>
+          <p>Device Name: <span class="spec-value">DESKTOP-ABCD1234</span></p>
+          <p>User: <span class="spec-value">Sample User</span></p>
+          <p>System Type: <span class="spec-value">64-bit</span></p>
+          <p>Uptime: <span class="spec-value">2 days, 3 hours, 45 minutes</span></p>
+          <p>Language/TimeZone : <span class="spec-value">en-US / (UTC+00:00) Universal Time</span></p>
+        </div>
+        <div class="overview-item">
+          <h3>Windows Information</h3>
+          <p>Edition: <span class="spec-value">Professional</span></p>
+          <p>Version: <span class="spec-value">23H2 (OS Build 26000.1000)</span></p>
+          <p>Installed on: <span class="spec-value">01/15/2025 10:22:45</span></p>
+          <p>Experience: <span class="spec-value">Windows Experience Pack</span></p>
+          <p>Pen and Touch: <span class="spec-value">Supported</span></p>
+          <p>Windows Status : <span class="spec-value">Activated</span></p>
+        </div>
+        <div class="overview-item">
+          <h3>Device Information</h3>
+          <p>Device ID: <span class="spec-value">XXXX-XXXX-XXXX-XXXX</span></p>
+          <p>Product ID: <span class="spec-value">00000-00000-00000-AAAAA</span></p>
+          <p>System Manufacturer: <span class="spec-value">GenericCorp</span></p>
+          <p>System Model: <span class="spec-value">Model X100</span></p>
+          <p>Virtualization: <span class="spec-value">Enabled</span></p>
+          <p>Chassis Types : <span class="spec-value">Notebook</span></p>
+        </div>
+      </div>
+      <div class="section">
+        <h2>CPU Information</h2>
+        <table>
+          <tr>
+            <th>Property</th>
+            <th>Value</th>
+          </tr>
+          <tr>
+            <td>Name</td>
+            <td><span class="spec-value">AMD Ryzen 5 3600 6-Core Processor</span></td>
+          </tr>
+          <tr>
+            <td>Manufacturer</td>
+            <td>AuthenticAMD</td>
+          </tr>
+          <tr>
+            <td>Architecture</td>
+            <td>x64</td>
+          </tr>
+          <tr>
+            <td>Cores</td>
+            <td>6</td>
+          </tr>
+          <tr>
+            <td>Threads</td>
+            <td>12</td>
+          </tr>
+          <tr>
+            <td>Current Clock Speed</td>
+            <td>3600 MHz</td>
+          </tr>
+          <tr>
+            <td>Max Clock Speed</td>
+            <td>4200 MHz</td>
+          </tr>
+          <tr>
+            <td>L2 Cache</td>
+            <td>3 MB</td>
+          </tr>
+          <tr>
+            <td>L3 Cache</td>
+            <td>32 MB</td>
+          </tr>
+          <tr>
+            <td>Socket Designation</td>
+            <td>AM4</td>
+          </tr>
+          <tr>
+            <td>Virtualization Enabled</td>
+            <td>True</td>
+          </tr>
+          <tr>
+            <td>Current Voltage</td>
+            <td>1.2V</td>
+          </tr>
+        </table>
+      </div>
+      <div class="section">
+        <h2>Memory Information</h2>
+        <p><strong>Total RAM:</strong> <span class="spec-value">16.00 GB (16384 MB)</span></p>
+        <table>
+          <tr>
+            <th>Property</th>
+            <th>Value</th>
+          </tr>
+          <tr>
+            <td colspan="2" style="background-color: #e3f2fd"><strong>Module in Slot A</strong></td>
+          </tr>
+          <tr>
+            <td>Manufacturer</td>
+            <td>GenericRAM</td>
+          </tr>
+          <tr>
+            <td>Part Number</td>
+            <td>GR16384X</td>
+          </tr>
+          <tr>
+            <td>Serial Number</td>
+            <td>SN12345678</td>
+          </tr>
+          <tr>
+            <td>Capacity</td>
+            <td>8 GB</td>
+          </tr>
+          <tr>
+            <td>Type</td>
+            <td>DDR4</td>
+          </tr>
+          <tr>
+            <td>Speed</td>
+            <td>3200 MHz</td>
+          </tr>
+          <tr>
+            <td>Form Factor</td>
+            <td>DIMM</td>
+          </tr>
+          <tr>
+            <td>Bank Label</td>
+            <td>ChannelA</td>
+          </tr>
+          <tr>
+            <td colspan="2" style="background-color: #e3f2fd"><strong>Module in Slot B</strong></td>
+          </tr>
+          <tr>
+            <td>Manufacturer</td>
+            <td>GenericRAM</td>
+          </tr>
+          <tr>
+            <td>Part Number</td>
+            <td>GR16384X</td>
+          </tr>
+          <tr>
+            <td>Serial Number</td>
+            <td>SN87654321</td>
+          </tr>
+          <tr>
+            <td>Capacity</td>
+            <td>8 GB</td>
+          </tr>
+          <tr>
+            <td>Type</td>
+            <td>DDR4</td>
+          </tr>
+          <tr>
+            <td>Speed</td>
+            <td>3200 MHz</td>
+          </tr>
+          <tr>
+            <td>Form Factor</td>
+            <td>DIMM</td>
+          </tr>
+          <tr>
+            <td>Bank Label</td>
+            <td>ChannelB</td>
+          </tr>
+        </table>
+      </div>
+      <div class="section">
+        <h2>Storage Information</h2>
+        <h3>Physical Disks</h3>
+        <table>
+          <tr>
+            <th>Property</th>
+            <th>Value</th>
+          </tr>
+          <tr>
+            <td colspan="2" style="background-color: #e3f2fd"><strong>GENERIC SSD 512GB</strong></td>
+          </tr>
+          <tr>
+            <td>Manufacturer</td>
+            <td>GenericStorage</td>
+          </tr>
+          <tr>
+            <td>Model</td>
+            <td>GENERIC SSD 512GB</td>
+          </tr>
+          <tr>
+            <td>Size</td>
+            <td>476.94 GB</td>
+          </tr>
+          <tr>
+            <td>Type</td>
+            <td>SSD</td>
+          </tr>
+          <tr>
+            <td>Interface</td>
+            <td>SATA</td>
+          </tr>
+          <tr>
+            <td>Serial Number</td>
+            <td>XXXX-XXXX-XXXX-XXXX</td>
+          </tr>
+          <tr>
+            <td>Health Status</td>
+            <td>Healthy</td>
+          </tr>
+          <tr>
+            <td>Operational Status</td>
+            <td>OK</td>
+          </tr>
+        </table>
+        <h3>Logical Drives</h3>
+        <table>
+          <tr>
+            <th>Drive</th>
+            <th>File System</th>
+            <th>BitLocker Status</th>
+            <th>Size</th>
+            <th>Free Space</th>
+            <th>Free %</th>
+            <th>Volume Name</th>
+          </tr>
+          <tr>
+            <td>C:</td>
+            <td>NTFS</td>
+            <td>Off</td>
+            <td>240 GB</td>
+            <td>130 GB</td>
+            <td><span class="good">54.17%</span></td>
+            <td>System</td>
+          </tr>
+          <tr>
+            <td>D:</td>
+            <td>NTFS</td>
+            <td>Off</td>
+            <td>236 GB</td>
+            <td>150 GB</td>
+            <td><span class="good">63.56%</span></td>
+            <td>Data</td>
+          </tr>
+        </table>
+      </div>
+      <div class="section">
+        <h2>Graphics Information</h2>
+        <table>
+          <tr>
+            <th>Property</th>
+            <th>Value</th>
+          </tr>
+          <tr>
+            <td colspan="2" style="background-color: #e3f2fd"><strong>NVIDIA GeForce GTX 1650</strong></td>
+          </tr>
+          <tr>
+            <td>Adapter RAM</td>
+            <td>4 GB</td>
+          </tr>
+          <tr>
+            <td>Driver Version</td>
+            <td>30.0.15.1259</td>
+          </tr>
+          <tr>
+            <td>Driver Date</td>
+            <td>2025-01-12</td>
+          </tr>
+          <tr>
+            <td>Video Processor</td>
+            <td>GeForce GTX Series</td>
+          </tr>
+          <tr>
+            <td>Current Resolution</td>
+            <td>1920x1080 @ 60Hz</td>
+          </tr>
+          <tr>
+            <td>Color Depth</td>
+            <td>32 bits</td>
+          </tr>
+        </table>
+        <h3>Display Information</h3>
+        <table>
+          <tr>
+            <th>Property</th>
+            <th>Value</th>
+          </tr>
+          <tr>
+            <td colspan="2" style="background-color: #e3f2fd"><strong>\\.\DISPLAY1</strong></td>
+          </tr>
+          <tr>
+            <td>Monitor</td>
+            <td>Generic PnP Monitor</td>
+          </tr>
+          <tr>
+            <td>Resolution</td>
+            <td>1920x1080</td>
+          </tr>
+          <tr>
+            <td>Refresh Rate</td>
+            <td>60 Hz</td>
+          </tr>
+          <tr>
+            <td>Manufacturer</td>
+            <td>Generic</td>
+          </tr>
+          <tr>
+            <td>Model</td>
+            <td>GEN-1080</td>
+          </tr>
+        </table>
+      </div>
+      <div class="section">
+        <h2>Network Information</h2>
+        <table>
+          <tr>
+            <th>Property</th>
+            <th>Value</th>
+          </tr>
+          <tr>
+            <td colspan="2" style="background-color: #e3f2fd"><strong>Realtek Wi-Fi Adapter</strong></td>
+          </tr>
+          <tr>
+            <td>Connection Type</td>
+            <td>Wi-Fi</td>
+          </tr>
+          <tr>
+            <td>Status</td>
+            <td>Connected</td>
+          </tr>
+          <tr>
+            <td>MAC Address</td>
+            <td>00:11:22:33:44:55</td>
+          </tr>
+          <tr>
+            <td>Speed</td>
+            <td>300 Mbps</td>
+          </tr>
+          <tr>
+            <td>IP Address(es)</td>
+            <td>10.0.0.123, fe80::1abc:2def</td>
+          </tr>
+          <tr>
+            <td>DNS Servers</td>
+            <td>10.0.0.1</td>
+          </tr>
+          <tr>
+            <td>Supported PHY</td>
+            <td>802.11b/g/n/ac</td>
+          </tr>
+          <tr>
+            <td>Wi-Fi Version</td>
+            <td>Wi-Fi 5 (802.11ac)</td>
+          </tr>
+        </table>
+        <h3>Bluetooth Information</h3>
+        <table>
+          <tr>
+            <th>Property</th>
+            <th>Value</th>
+          </tr>
+          <tr>
+            <td colspan="2" style="background-color: #e3f2fd"><strong>Generic Bluetooth Adapter</strong></td>
+          </tr>
+          <tr>
+            <td>Driver Version</td>
+            <td>5.100.0.1</td>
+          </tr>
+          <tr>
+            <td>Driver Date</td>
+            <td>2024-08-01</td>
+          </tr>
+          <tr>
+            <td>Bluetooth Version</td>
+            <td>5.2</td>
+          </tr>
+          <tr>
+            <td>Status</td>
+            <td>OK</td>
+          </tr>
+        </table>
+      </div>
+      <div class="section">
+        <h2>Battery Information</h2>
+        <table>
+          <tr>
+            <th>Property</th>
+            <th>Value</th>
+          </tr>
+          <tr>
+            <td colspan="2" style="background-color: #e3f2fd"><strong>Primary</strong></td>
+          </tr>
+          <tr>
+            <td>Manufacturer</td>
+            <td>GenericBattery</td>
+          </tr>
+          <tr>
+            <td>Chemistry</td>
+            <td>Li-ion</td>
+          </tr>
+          <tr>
+            <td>Design Capacity</td>
+            <td>48,000 mWh</td>
+          </tr>
+          <tr>
+            <td>Full Charge Capacity</td>
+            <td>46,500 mWh</td>
+          </tr>
+          <tr>
+            <td>Charge Remaining</td>
+            <td>85%</td>
+          </tr>
+          <tr>
+            <td>Status</td>
+            <td>Discharging</td>
+          </tr>
+          <tr>
+            <td>Runtime Estimate</td>
+            <td>2 hr 15 min</td>
+          </tr>
+          <tr>
+            <td>Time On Battery</td>
+            <td>30 min</td>
+          </tr>
+        </table>
+      </div>
+      <div class="section">
+        <h2>Motherboard & BIOS</h2>
+        <table>
+          <tr>
+            <th>Property</th>
+            <th>Value</th>
+          </tr>
+          <tr>
+            <td colspan="2" style="background-color: #e3f2fd"><strong>Motherboard</strong></td>
+          </tr>
+          <tr>
+            <td>Manufacturer</td>
+            <td>GenericCorp</td>
+          </tr>
+          <tr>
+            <td>Product</td>
+            <td>MBX-2000</td>
+          </tr>
+          <tr>
+            <td>Serial Number</td>
+            <td>MB123456789</td>
+          </tr>
+          <tr>
+            <td>Version</td>
+            <td>1.0</td>
+          </tr>
+          <tr>
+            <td colspan="2" style="background-color: #e3f2fd"><strong>BIOS</strong></td>
+          </tr>
+          <tr>
+            <td>Manufacturer</td>
+            <td>GenericCorp</td>
+          </tr>
+          <tr>
+            <td>Name</td>
+            <td>GENBIOS v1.0</td>
+          </tr>
+          <tr>
+            <td>Version</td>
+            <td>1.0.0</td>
+          </tr>
+          <tr>
+            <td>Serial Number</td>
+            <td>BIOS123456</td>
+          </tr>
+          <tr>
+            <td>Release Date</td>
+            <td>2024-10-01 12:00:00</td>
+          </tr>
+          <tr>
+            <td>SMBIOS Version</td>
+            <td>3.3</td>
+          </tr>
+        </table>
+      </div>
+      <div class="section">
+        <h2>Boot & TPM Information</h2>
+        <table>
+          <tr>
+            <th>Property</th>
+            <th>Value</th>
+          </tr>
+          <tr>
+            <td>Secure Boot Status</td>
+            <td>Enabled</td>
+          </tr>
+          <tr>
+            <td>TPM Present</td>
+            <td>True</td>
+          </tr>
+          <tr>
+            <td>TPM Version</td>
+            <td>2.0, 0, 1.16</td>
+          </tr>
+          <tr>
+            <td>Last Boot Up</td>
+            <td>27-May-25 09:48:23 PM</td>
+          </tr>
+        </table>
+      </div>
+      <div class="footer">
+        <p>Report generated by System Specs Reporter - 2025</p>
+        <p>Designed and developed by <a href="https://nexoracle.com" target="_blank" style="text-decoration: underline; color: inherit">NexOracle</a></p>
+      </div>
+    </div>
+  </body>
+</html>

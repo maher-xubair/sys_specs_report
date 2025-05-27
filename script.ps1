@@ -1,3 +1,66 @@
+# Require at least PowerShell 5.1 for CIM cmdlets
+if ($PSVersionTable.PSVersion -lt [Version]"5.1") {
+    Write-Warning "PowerShell 5.1+ is required. Attempting to launch PowerShell Core..."
+    if (Get-Command pwsh -ErrorAction SilentlyContinue) {
+        & pwsh -NoProfile -ExecutionPolicy Bypass -File $PSCommandPath
+        exit
+    } else {
+        Write-Error "PowerShell Core (pwsh) not found. Please install it from https://aka.ms/pscore6"
+        exit 1
+    }
+}
+
+
+# Check for required modules
+$requiredModules = @(
+    @{Name="CimCmdlets"; Optional=$false},
+    @{Name="NetAdapter"; Optional=$true},
+    @{Name="BitLocker"; Optional=$true}
+)
+
+foreach ($module in $requiredModules) {
+    if (-not (Get-Module -ListAvailable -Name $module.Name)) {
+        if (-not $module.Optional) {
+            Write-Warning "Required module $($module.Name) is not available. Some features will be limited."
+            # Add fallback logic for each module
+        }
+    }
+}
+
+# Check for admin rights early in the script
+$isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+if (-not $isAdmin) {
+    Write-Warning "Some information requires administrator privileges and will be limited."
+    # Add logic to skip admin-only sections
+}
+
+# Verify write permissions before generating report
+function Test-WriteAccess {
+    param($Path)
+    try {
+        [IO.File]::OpenWrite($Path).Close()
+        return $true
+    } catch {
+        return $false
+    }
+}
+
+# Alternative save locations if default fails
+$saveLocations = @(
+    "$env:USERPROFILE\Desktop",
+    "$env:USERPROFILE\Documents",
+    "$env:TEMP"
+)
+
+# Bypass Execution Policy
+if ($ExecutionContext.SessionState.LanguageMode -ne 'FullLanguage' -or
+    (Get-ExecutionPolicy) -match 'Restricted|AllSigned') {
+    Write-Verbose "Relaunching under Bypass execution policy..."
+    & powershell -NoProfile -ExecutionPolicy Bypass -File $PSCommandPath @Args
+    exit
+}
+
+
 function Get-RegistryInstallDate {
     $ts = Get-ItemPropertyValue 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion' -Name InstallDate -ErrorAction SilentlyContinue
     if ($ts) {
@@ -29,7 +92,9 @@ function Map-SmbiosType {
         24 {'DDR3'}
         26 {'DDR4'}
         27 {'DDR5'}
-        default { "Type$code" }
+        28 {'DDR5'}
+        34 {'DDR5'}
+        default { "Type $code" }
     }
 }
 
@@ -51,7 +116,7 @@ while (Test-Path $reportFile) {
 
 Write-Host "Starting system information gathering..." -ForegroundColor Cyan
 
-# Create HTML report with enhanced styling and mobile responsiveness
+# Create HTML report
 $html = @"
 <!DOCTYPE html>
 <html>
@@ -204,7 +269,7 @@ $html = @"
 "@
 
 Write-Host "Getting system overview..." -ForegroundColor Green
-# System Information with more details
+# System Information
 $computerSystem = Get-CimInstance Win32_ComputerSystem
 $os = Get-CimInstance Win32_OperatingSystem
 $computerName = $env:COMPUTERNAME
@@ -213,7 +278,7 @@ $lastBootTime = (Get-CimInstance Win32_OperatingSystem).LastBootUpTime
 $uptime = New-TimeSpan -Start $lastBootTime -End (Get-Date)
 $runtime = "$($uptime.Days) days, $($uptime.Hours) hours, $($uptime.Minutes) minutes"
 
-# Windows Information with more details
+# Windows Information
 $win32_OS = Get-CimInstance Win32_OperatingSystem
 $winVer = (Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion")
 $displayVersion = $winVer.DisplayVersion
@@ -232,10 +297,8 @@ $touchSupport = Get-TouchSupport
 # Virtualization Status
 $virtStatus = Get-VirtStatus
 
-# System Model - Removed the (System Device) label
+# System Model
 $systemModel = $($computerSystem.Model)
-# If the model doesn't contain a common label, add a generic one
-# Removed the specific logic that added "(System Device)"
 
 # Windows Activation Status
 $windowsStatus = try {
@@ -329,7 +392,7 @@ $html += @"
 "@
 
 Write-Host "Getting CPU information..." -ForegroundColor Green
-# CPU Information with more details
+# CPU Information
 $cpu = Get-CimInstance Win32_Processor
 $cpuCores = $cpu.NumberOfCores
 $cpuThreads = $cpu.NumberOfLogicalProcessors
@@ -361,7 +424,7 @@ $html += @"
 "@
 
 Write-Host "Getting memory information..." -ForegroundColor Green
-# Enhanced Memory Information with DDR detection from your script
+# Memory Information with DDR detection
 $memory = Get-CimInstance Win32_PhysicalMemory
 $totalMemoryGB = [math]::Round($computerSystem.TotalPhysicalMemory / 1GB, 2)
 $totalMemoryMB = [math]::Round($computerSystem.TotalPhysicalMemory / 1MB, 2)
@@ -409,7 +472,7 @@ $html += @"
 "@
 
 Write-Host "Getting storage information..." -ForegroundColor Green
-# Enhanced Disk Information using PhysicalDisk class (from your script)
+# Disk Information using PhysicalDisk class
 $disks = Get-PhysicalDisk
 $logicalDisks = Get-Volume | Where-Object DriveLetter
 
@@ -425,7 +488,7 @@ foreach ($disk in $disks) {
     $sizeGB = [math]::Round($disk.Size / 1GB, 2)
     $sizeMB = [math]::Round($disk.Size / 1MB, 2)
     
-    # Enhanced disk type detection
+    # Disk type detection
     $busType = switch ($disk.BusType) {
         0 { "Unknown" }
         1 { "SCSI" }
@@ -445,7 +508,7 @@ foreach ($disk in $disks) {
         15 { "File Backed Virtual" }
         16 { "Storage Spaces" }
         17 { "NVMe" }
-        default { "$($disk.BusType)" } # Removed "Type"
+        default { "$($disk.BusType)" }
     }
     
     $mediaType = switch ($disk.MediaType) {
@@ -453,7 +516,7 @@ foreach ($disk in $disks) {
         3 { "HDD" }
         4 { "SSD" }
         5 { "SCM" }
-        default { "$($disk.MediaType)" } # Removed "Type"
+        default { "$($disk.MediaType)" }
     }
     
     # Attempt to get manufacturer from Win32_DiskDrive if PhysicalDisk.Manufacturer is N/A
@@ -522,7 +585,7 @@ $html += @"
 "@
 
 Write-Host "Getting graphics information..." -ForegroundColor Green
-# Enhanced GPU Information
+# GPU Information
 $gpus = Get-CimInstance Win32_VideoController
 $displaySettings = Get-CimInstance Win32_DisplayConfiguration
 
@@ -549,6 +612,7 @@ foreach ($gpu in $gpus) {
 "@
 }
 
+Write-Host "Getting Display information..." -ForegroundColor Green
 # Display Information
 $html += @"
             </table>
@@ -597,9 +661,24 @@ $html += @"
 
 
 Write-Host "Getting network information..." -ForegroundColor Green
-# Enhanced Network Information with connection status
+# Network Information with connection status
 $nics = Get-CimInstance Win32_NetworkAdapter | Where-Object { $_.NetEnabled -eq $true }
 $networkConfigs = Get-CimInstance Win32_NetworkAdapterConfiguration | Where-Object { $_.IPEnabled -eq $true }
+
+# Fetch Wi-Fi info once
+$wifiVersion = "N/A"
+$supportedPhy = "N/A"
+try {
+    $wifiData = netsh wlan show drivers
+    $phyMatch = $wifiData | Select-String "Radio types supported"
+    if ($phyMatch) {
+        $supportedPhy = ($phyMatch -split ":", 2)[1].Trim()
+        if ($supportedPhy -match "ax")       { $wifiVersion = "Wi-Fi 6 (802.11ax)" }
+        elseif ($supportedPhy -match "ac")   { $wifiVersion = "Wi-Fi 5 (802.11ac)" }
+        elseif ($supportedPhy -match "n")    { $wifiVersion = "Wi-Fi 4 (802.11n)" }
+        else                                 { $wifiVersion = "Legacy/Unknown" }
+    }
+} catch {}
 
 $html += @"
         <div class="section">
@@ -608,31 +687,22 @@ $html += @"
                 <tr><th>Property</th><th>Value</th></tr>
 "@
 
+if($nics){
+
+
 foreach ($nic in $nics) {
     $config = $networkConfigs | Where-Object { $_.Index -eq $nic.Index }
     $speed = if ($nic.Speed) { "$([math]::Round($nic.Speed / 1MB, 2)) Mbps" } else { "Unknown" }
     $connectionStatus = if ($nic.NetConnectionStatus -eq 2) { "Connected" } else { "Disconnected" }
-    $connectionType = if ($nic.Name -like "*Wi-Fi*" -or $nic.Name -like "*Wireless*") { "Wi-Fi" } else { "Ethernet" }
+       # —— NEW: lookup the same adapter in Get-NetAdapter ——
+    $net = Get-NetAdapter -InterfaceIndex $nic.InterfaceIndex -ErrorAction SilentlyContinue
+
+    # InterfaceType 71 = Wi-Fi; 6 = Ethernet
+    $connectionType = if ($net -and $net.InterfaceType -eq 71) { "Wi-Fi" } else { "Ethernet" }
     
     $ipAddresses = if ($config) { $config.IPAddress -join ", " } else { "N/A" }
     $dnsServers = if ($config -and $config.DNSServerSearchOrder) { $config.DNSServerSearchOrder -join ", " } else { "N/A" }
 
-    # Wi-Fi Specifics
-    $supportedPhy = "N/A"
-    $wifiVersion = "N/A"
-    if ($connectionType -eq "Wi-Fi") {
-        try {
-            $phyLine = netsh wlan show drivers | Select-String "Radio types supported" -ErrorAction Stop
-            if ($phyLine) {
-                $supportedPhy = ($phyLine -split ":",2)[1].Trim()
-                if ($supportedPhy -match "ax")       { $wifiVersion = "Wi-Fi 6 (802.11ax)" }
-                elseif ($supportedPhy -match "ac")   { $wifiVersion = "Wi-Fi 5 (802.11ac)" }
-                elseif ($supportedPhy -match "n")    { $wifiVersion = "Wi-Fi 4 (802.11n)" }
-                else                                 { $wifiVersion = "Legacy/Unknown" }
-            }
-        } catch {}
-    }
-    
     $html += @"
                 <tr><td colspan="2" style="background-color: #e3f2fd;"><strong>$($nic.Name)</strong></td></tr>
                 <tr><td>Connection Type</td><td>$connectionType</td></tr>
@@ -645,7 +715,14 @@ foreach ($nic in $nics) {
                 <tr><td>Wi-Fi Version</td><td>$wifiVersion</td></tr>
 "@
 }
+} else {
+        $html += @"
+                <tr><td colspan="2">No Wifi adapters found or enabled.</td></tr>
+"@
+}
 
+
+Write-Host "Getting Bluetooth information..." -ForegroundColor Green
 # Bluetooth Information
 $html += @"
             </table>
@@ -653,13 +730,56 @@ $html += @"
             <table>
                 <tr><th>Property</th><th>Value</th></tr>
 "@
+
+# LMP to Bluetooth version mapping function
+function Get-BluetoothVersionFromLMP($lmp) {
+    switch ($lmp) {
+        0 { return "1.0b" }
+        1 { return "1.1" }
+        2 { return "1.2" }
+        3 { return "2.0" }
+        4 { return "2.1" }
+        5 { return "3.0" }
+        6 { return "4.0" }
+        7 { return "4.1" }
+        8 { return "4.2" }
+        9 { return "5.0" }
+        10 { return "5.1" }
+        11 { return "5.2" }
+        12 { return "5.3" }
+        13 { return "5.4" }
+        14 { return "6.0" }
+        default { return "Unknown / Unable to read LMP" }
+    }
+}
+
+# Helper: try get LMP version from registry keys
+function Get-LMPVersionFromRegistry {
+    $paths = @(
+        "HKLM:\SYSTEM\CurrentControlSet\Services\BTHPORT\Parameters\Devices",
+        "HKLM:\SYSTEM\CurrentControlSet\Services\BTHENUM\Parameters\Devices"
+    )
+    foreach ($path in $paths) {
+        if (Test-Path $path) {
+            foreach ($deviceKey in Get-ChildItem $path -ErrorAction SilentlyContinue) {
+                $lmp = (Get-ItemProperty -Path $deviceKey.PSPath -Name 'LMPVersion' -ErrorAction SilentlyContinue).LMPVersion
+                if ($lmp -ne $null) {
+                    return [int]$lmp
+                }
+            }
+        }
+    }
+    return $null
+}
+
+# Get Bluetooth devices
 $bluetoothDevices = Get-PnpDevice -Class Bluetooth -Status OK -ErrorAction SilentlyContinue
 if ($bluetoothDevices) {
     foreach ($bt in $bluetoothDevices) {
         $btName = if ($bt.FriendlyName) { $bt.FriendlyName } else { "N/A" }
         $btDriverVersion = "N/A"
         $btDriverDate = "N/A"
-        $btVersion = "N/A"
+        $btVersion = "Unknown / Unable to read LMP"
         $btStatus = if ($bt.Status) { $bt.Status } else { "N/A" }
 
         try {
@@ -667,17 +787,30 @@ if ($bluetoothDevices) {
             if ($drv) {
                 $btDriverVersion = if ($drv.DriverVersion) { $drv.DriverVersion } else { "N/A" }
                 $btDriverDate = if ($drv.DriverDate) { $drv.DriverDate.ToString('yyyy-MM-dd') } else { "N/A" }
-                
-                # Estimate Bluetooth version from driver major version
-                $ver = [Version]$drv.DriverVersion
-                if ($ver.Major -ge 10)       { $btVersion = "5.0+" }
-                elseif ($ver.Major -eq 8)    { $btVersion = if ($ver.Minor -ge 1) {"4.2"} else {"4.0/4.1"} }
-                else                         { $btVersion = "Older/Unknown" }
             }
         } catch {}
 
+        # Try get LMP from device property first
+        $lmpVersion = $null
+        try {
+            $lmpVersion = Get-PnpDeviceProperty -InstanceId $bt.InstanceId -KeyName 'DEVPKEY_Device_Bluetooth_LMPVersion' -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Data
+            if ($lmpVersion -ne $null) {
+                $lmpVersion = [int]$lmpVersion
+            }
+        } catch {}
+
+        # Fallback: try registry if LMP from property is null
+        if ($lmpVersion -eq $null) {
+            $lmpVersion = Get-LMPVersionFromRegistry
+        }
+
+        # Map LMP to Bluetooth version
+        if ($lmpVersion -ne $null) {
+            $btVersion = Get-BluetoothVersionFromLMP $lmpVersion
+        }
+
         $html += @"
-                <tr><td colspan="2" style="background-color: #e3f2fd;"><strong>Name : $btName</strong></td></tr>
+                <tr><td colspan="2" style="background-color: #e3f2fd;"><strong>$btName</strong></td></tr>
                 <tr><td>Driver Version</td><td>$btDriverVersion</td></tr>
                 <tr><td>Driver Date</td><td>$btDriverDate</td></tr>
                 <tr><td>Bluetooth Version</td><td>$btVersion</td></tr>
@@ -696,7 +829,7 @@ $html += @"
 
 
 Write-Host "Getting battery information..." -ForegroundColor Green
-# Enhanced Battery Information from your script
+# Battery Information
 $batt = Get-CimInstance Win32_Battery
 if ($batt) {
     $html += @"
@@ -749,7 +882,7 @@ if ($batt) {
 }
 
 Write-Host "Getting motherboard and BIOS information..." -ForegroundColor Green
-# Motherboard and BIOS Information with your fixes
+# Motherboard and BIOS Information
 $mb = Get-CimInstance Win32_BaseBoard
 # Use Get-WmiObject specifically for BIOS ReleaseDate as per user's working snippet
 $biosWmi = Get-WmiObject Win32_BIOS
@@ -785,6 +918,7 @@ $html += @"
         </div>
 "@
 
+Write-Host "Getting Boot and TPM information..." -ForegroundColor Green
 # New Secure Boot & TPM Section
 $secureBootEnabled = try {
     $sb = Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\SecureBoot\State" -Name UEFISecureBootEnabled -ErrorAction Stop
@@ -853,7 +987,7 @@ $html | Out-File -FilePath $reportFile -Encoding UTF8
 Write-Host "Report generation complete!" -ForegroundColor Green
 # Open the report
 Write-Host "Report generated: $reportFile" -ForegroundColor Green
-$open = Read-Host "Would you like to open the report now? (Y/N)"
+$open = Read-Host "Would you like to open the report now? (Y/N) [Default: Y]"
 if ($open -eq "" -or $open -eq "Y" -or $open -eq "y") { # Default to Y on empty input
     Start-Process $reportFile
 }
